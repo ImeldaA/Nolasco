@@ -2,13 +2,13 @@
 library(dplyr)
 library(tidyr)
 
-Censos_2011 <- read.csv("C:/Users/JC/Desktop/ISPN/Censos_ISPN_2011.csv", sep=";") %>%
+Censos_2011 <- read.csv("C:/Users/JC/Documents/GitHub/Nolasco/Censos_ISPN_2011.csv", sep=";") %>%
   mutate(ID = paste(site, date, observer, dive, replicate)) %>%
   select(-site, -date, -observer, -dive, -replicate)
 
-species_2011 <- read.csv("C:/Users/JC/Desktop/ISPN/species_2013.csv", sep =";")
+species_2011 <- read.csv("C:/Users/JC/Documents/GitHub/Nolasco/species_2013.csv", sep =";")
 
-Registros_2011 <- read.csv("C:/Users/JC/Desktop/ISPN/Registros_ISPN_2011.csv", sep=";") %>%
+Registros_2011 <- read.csv("C:/Users/JC/Documents/GitHub/Nolasco/Registros_ISPN_2011.csv", sep=";") %>%
   mutate(ID = paste(site, date, observer, dive, replicate)) %>%
   left_join(Censos_2011, by = "ID") %>%
   left_join(species_2011, by = "species") %>%
@@ -53,8 +53,8 @@ Registros_2011 <- read.csv("C:/Users/JC/Desktop/ISPN/Registros_ISPN_2011.csv", s
          Clase,
          FM = other_depth_information)
 
-transectos_peces <- read.csv("C:/Users/JC/Desktop/ISPN/limpios/transectos_peces2011.csv", sep =";")
-transectos_invert <- read.csv("C:/Users/JC/Desktop/ISPN/limpios/transectos_invert2011.csv", sep = ";")
+transectos_peces <- read.csv("C:/Users/JC/Documents/GitHub/Nolasco/limpios/transectos_peces2011.csv", sep =";")
+transectos_invert <- read.csv("C:/Users/JC/Documents/GitHub/Nolasco/limpios/transectos_invert2011.csv", sep = ";")
 
 peces <- filter(Registros_2011, Clase == "fish") %>%
   left_join(transectos_peces, by = "ID") %>%
@@ -69,16 +69,22 @@ invert <- filter(Registros_2011, Clase == "invert") %>%
   rename(Transecto = Transecto.x)
 
 
-write.table(peces, file = "C:/Users/JC/Desktop/ISPN/limpios/peces2011.csv", row.names = F, sep = ";")
-write.table(invert, file = "C:/Users/JC/Desktop/ISPN/limpios/invert2011.csv", row.names = F, sep = ";")
+write.table(peces, file = "C:/Users/JC/Documents/GitHub/Nolasco/limpios/peces2011.csv", row.names = F, sep = ";")
+write.table(invert, file = "C:/Users/JC/Documents/GitHub/Nolasco/limpios/invert2011.csv", row.names = F, sep = ";")
 
 
 ########################################
 
-species_2013 <- read.csv("C:/Users/JC/Desktop/ISPN/species_2013.csv", sep =";")
-
-Registros_2013 <- read.csv("C:/Users/JC/Desktop/ISPN/Registros_ISPN_2013.csv", sep=";") %>%
+Censos_2013 <- read.csv("C:/Users/JC/Documents/GitHub/Nolasco/Censos_ISPN_2013.csv", sep=";") %>%
   mutate(ID = paste(site, date, observer, dive, replicate)) %>%
+  select(-site, -date, -observer, -dive, -replicate)
+
+
+species_2013 <- read.csv("C:/Users/JC/Documents/GitHub/Nolasco/species_2013.csv", sep =";")
+
+Registros_2013 <- read.csv("C:/Users/JC/Documents/GitHub/Nolasco/Registros_ISPN_2013.csv", sep=";") %>%
+  mutate(ID = paste(site, date, observer, dive, replicate)) %>%
+  left_join(Censos_2013, by = "ID") %>%
   left_join(species_2013, by = "species") %>%
   mutate(GeneroEspecie = paste(Genero, Especie, sep = " "),
          Comunidad = NA,
@@ -90,13 +96,6 @@ Registros_2013 <- read.csv("C:/Users/JC/Desktop/ISPN/Registros_ISPN_2013.csv", s
          ANP = NA,
          Transecto = NA,
          ClaseT = NA,
-         HoraInicial = NA,
-         HoraFinal = NA,
-         ProfundidadInicial = NA,
-         ProfundidadFinal = NA,
-         Temperatura = NA,
-         Visibilidad = NA,
-         Corriente = NA,
          FM = NA) %>%
   select(ID,
          dive,
@@ -111,12 +110,12 @@ Registros_2013 <- read.csv("C:/Users/JC/Desktop/ISPN/Registros_ISPN_2013.csv", s
          TipoProteccion,
          ANP,
          BuzoMonitor = observer,
-         HoraInicial,
-         HoraFinal,
-         ProfundidadFinal,
-         Temperatura,
-         Visibilidad,
-         Corriente,
+         HoraInicial = start_time,
+         HoraFinal = end_time,
+         ProfundidadFinal = depth,
+         Temperatura = temperature,
+         Visibilidad = visibility,
+         Corriente = current,
          Transecto,
          Genero,
          Especie,
@@ -126,11 +125,15 @@ Registros_2013 <- read.csv("C:/Users/JC/Desktop/ISPN/Registros_ISPN_2013.csv", s
          Talla = size_observed,
          Abundancia = abundance,
          Clase,
-         FM)
+         FM = other_depth_information)
 
-transectos_invert <- read.csv("C:/Users/JC/Desktop/ISPN/limpios/transectos_invert2013.csv", sep = ";")
+transectos_invert <- read.csv("C:/Users/JC/Documents/GitHub/Nolasco/limpios/transectos_invert2013.csv", sep = ";")
 
-peces_2013 <- filter(Registros_2013, Clase == "fish")
+peces_2013 <- filter(Registros_2013, Clase == "fish") %>%
+  left_join(transectos_peces, by = "ID") %>%
+  mutate(Transecto.x = Transecto.y) %>%
+  select(-Transecto.y) %>%
+  rename(Transecto = Transecto.x)
 
 invert_2013 <- filter(Registros_2013, Clase == "invert") %>%
   left_join(transectos_invert, by = "ID") %>%
@@ -138,12 +141,12 @@ invert_2013 <- filter(Registros_2013, Clase == "invert") %>%
   select(-Transecto.y, -ClaseT, -Talla) %>%
   rename(Transecto = Transecto.x)
 
-write.table(peces_2013, file = "C:/Users/JC/Desktop/ISPN/limpios/peces2013.csv", row.names = F, sep = ";")
-write.table(invert_2013, file = "C:/Users/JC/Desktop/ISPN/limpios/invert2013.csv", row.names = F, sep = ";")
+write.table(peces_2013, file = "C:/Users/JC/Documents/GitHub/Nolasco/limpios/peces2013.csv", row.names = F, sep = ";")
+write.table(invert_2013, file = "C:/Users/JC/Documents/GitHub/Nolasco/limpios/invert2013.csv", row.names = F, sep = ";")
 
 peces = rbind(peces, peces_2013)
 invert = rbind(invert, invert_2013)
 
 
-write.table(peces, file = "C:/Users/JC/Desktop/ISPN/limpios/peces2011y2013.csv", row.names = F, sep = ";")
-write.table(invert, file = "C:/Users/JC/Desktop/ISPN/limpios/invert2011y2013.csv", row.names = F, sep = ";")
+write.table(peces, file = "C:/Users/JC/Documents/GitHub/Nolasco/limpios/peces2011y2013.csv", row.names = F, sep = ";")
+write.table(invert, file = "C:/Users/JC/Documents/GitHub/Nolasco/limpios/invert2011y2013.csv", row.names = F, sep = ";")
